@@ -246,8 +246,8 @@ class DataPrepper:
         # print('-' * 25)
         # print(log_query)
 
-        
         response = self.opensearch.search(body=log_query, index=self.index_name)
+
 
         # hits = response['hits']['hits']
         # import json
@@ -286,6 +286,8 @@ class DataPrepper:
                     
                 # if entry["name"] == "salesRankShortTerm":
                 #     feature_results["salesRankShortTerm"].append(entry.get('value', 0))
+        # for key in feature_results:
+        #     print(key, ':', len(feature_results[key]))
         frame = pd.DataFrame(feature_results)
         return frame.astype({'doc_id': 'int64', 'query_id': 'int64', 'sku': 'int64'})
         # IMPLEMENT_END

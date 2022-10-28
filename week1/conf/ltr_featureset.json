@@ -34,9 +34,10 @@
         "template": {
           "match_phrase": {
             "artistName": {
-            "name": "{{keywords}}",
-            "slop": 3
-          }}
+              "query": "{{keywords}}",
+              "slop": 3
+            }
+          }
         }
       },
       {
@@ -48,9 +49,10 @@
         "template": {
           "match_phrase": {
             "shortDescription": {
-            "name": "{{keywords}}",
-            "slop": 3
-          }}
+              "query": "{{keywords}}",
+              "slop": 3
+            }
+          }
         }
       },
       {
@@ -62,9 +64,10 @@
         "template": {
           "match_phrase": {
             "longDescription": {
-            "name": "{{keywords}}",
-            "slop": 3
-          }}
+              "query": "{{keywords}}",
+              "slop": 3
+            }
+          }
         }
       },
       {
@@ -76,7 +79,7 @@
               {
                 "field_value_factor": {
                   "field": "customerReviewAverage ",
-                  "missing": 2.5
+                  "missing": 0
                 }
               }
             ],
