@@ -262,10 +262,11 @@ class DataPrepper:
         feature_results["query_id"] = []  # ^^^
         feature_results["sku"] = []
         feature_results["name_match"] = []
+        feature_results["salesRankShortTerm"] = []
             
         ##### Step Extract LTR Logged Features:
         # IMPLEMENT_START --
-        print("IMPLEMENT ME: __log_ltr_query_features: Extract log features out of the LTR:EXT response and place in a data frame")
+        # print("IMPLEMENT ME: __log_ltr_query_features: Extract log features out of the LTR:EXT response and place in a data frame")
         # Loop over the hits structure returned by running `log_query` and then extract out the features from the response per query_id and doc id.  Also capture and return all query/doc pairs that didn't return features
         # Your structure should look like the data frame below
 
@@ -276,8 +277,15 @@ class DataPrepper:
             feature_results["sku"].append(hit["_source"]["sku"][0])  
             entries = hit["fields"]["_ltrlog"][0]['log_entry']
             for entry in entries:
-                if entry["name"] == "name_match":
-                    feature_results["name_match"].append(entry.get('value', 0))
+                if entry["name"] in feature_results:
+                    feature_results[entry["name"]].append(entry.get('value', 0))
+                else:
+                    feature_results[entry["name"]] = [entry.get('value', 0)]
+                # if entry["name"] == "name_match":
+                #     feature_results["name_match"].append(entry.get('value', 0))
+                    
+                # if entry["name"] == "salesRankShortTerm":
+                #     feature_results["salesRankShortTerm"].append(entry.get('value', 0))
         frame = pd.DataFrame(feature_results)
         return frame.astype({'doc_id': 'int64', 'query_id': 'int64', 'sku': 'int64'})
         # IMPLEMENT_END

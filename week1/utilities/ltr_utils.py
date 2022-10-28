@@ -23,6 +23,7 @@ def create_rescore_ltr_query(user_query: str, query_obj, click_prior_query: str,
                     "store": ltr_store_name,
                 }
             },
+            "score_mode": "total",
             "rescore_query_weight": rescore_query_weight, # Magic number, but let's say LTR matches are 2x baseline matches
             "query_weight": main_query_weight
         }
@@ -73,7 +74,6 @@ def create_sltr_hand_tuned_query(user_query, query_obj, click_prior_query, ltr_m
 
 def create_feature_log_query(query, doc_ids, click_prior_query, featureset_name, ltr_store_name, size=200, terms_field="_id"):
     ##### Step 3.b:
-    print("IMPLEMENT ME: create_feature_log_query")
     query_obj = {
             'query': {
                 'bool': {
