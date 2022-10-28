@@ -89,7 +89,8 @@ def create_feature_log_query(query, doc_ids, click_prior_query, featureset_name,
                                 "featureset": featureset_name,
                                 "store": ltr_store_name,
                                 "params": {
-                                    "keywords": query
+                                    "keywords": query,
+                                    "skus": query.split()
                                 }
                             }
                         }
