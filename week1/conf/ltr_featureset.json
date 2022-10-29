@@ -149,6 +149,18 @@
             }
           }
         }
+      },
+      {
+        "name": "click_prior",
+        "params": [
+          "click_prior_query"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match": {
+            "_id": "{{click_prior_query}}"
+          }
+        }
       }
     ]
   }

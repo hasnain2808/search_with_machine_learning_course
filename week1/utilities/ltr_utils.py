@@ -16,11 +16,12 @@ def create_rescore_ltr_query(user_query: str, query_obj, click_prior_query: str,
             "rescore_query": {
                 "sltr": {
                     "params": {
-                        "keywords": user_query
+                        "keywords": user_query,
+                        "click_prior_query": click_prior_query.split() or '0'
                     },
                     "model": ltr_model_name,
                     # Since we are using a named store, as opposed to simply '_ltr', we need to pass it in
-                    "store": ltr_store_name,
+                    "store": ltr_store_name,    
                 }
             },
             "score_mode": "total",
@@ -30,7 +31,6 @@ def create_rescore_ltr_query(user_query: str, query_obj, click_prior_query: str,
     }
     if active_features is not None and len(active_features) > 0:
         query_obj["rescore"]["query"]["rescore_query"]["sltr"]["active_features"] =  active_features
-
     return query_obj
 
 # take an existing query and add in an SLTR so we can use it for explains to see how much SLTR contributes
@@ -41,7 +41,7 @@ def create_sltr_simple_query(user_query, query_obj, click_prior_query, ltr_model
         "sltr": {
             "params": {
                 "keywords": user_query,
-                "click_prior_query": click_prior_query
+                "click_prior_query": click_prior_query.split() or '0'
             },
             "model": ltr_model_name,
             # Since we are using a named store, as opposed to simply '_ltr', we need to pass it in
@@ -60,7 +60,7 @@ def create_sltr_hand_tuned_query(user_query, query_obj, click_prior_query, ltr_m
         "sltr": {
             "params": {
                 "keywords": user_query,
-                "click_prior_query": click_prior_query
+                "click_prior_query": click_prior_query.split() or '0'
             },
             "model": ltr_model_name,
             # Since we are using a named store, as opposed to simply '_ltr', we need to pass it in
@@ -90,7 +90,8 @@ def create_feature_log_query(query, doc_ids, click_prior_query, featureset_name,
                                 "store": ltr_store_name,
                                 "params": {
                                     "keywords": query,
-                                    "skus": query.split()
+                                    "skus": query.split(),
+                                    "click_prior_query": click_prior_query.split() or '0'
                                 }
                             }
                         }
