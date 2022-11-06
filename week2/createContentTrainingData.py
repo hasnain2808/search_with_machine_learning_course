@@ -83,5 +83,3 @@ if __name__ == '__main__':
         with open(output_file, 'w') as output:
             for (index, row) in df.iterrows():
                 output.write(f'__label__{row["cat"]} {row["name"]}\n')
-
-                ~/fastText-0.9.2/fasttext supervised -input /workspace/datasets/fasttext/training_data.txt -output product_classifier -lr 1.0 -epoch 25 -wordNgrams 2
