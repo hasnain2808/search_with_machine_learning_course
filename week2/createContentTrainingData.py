@@ -6,6 +6,7 @@ import os
 import xml.etree.ElementTree as ET
 from pathlib import Path
 import pandas as pd
+import csv
 
 def transform_name(product_name):
     # IMPLEMENT
@@ -78,5 +79,9 @@ if __name__ == '__main__':
         cat_list = df_count[df_count > min_products].index.tolist()
 
         df = df[df['cat'].isin(cat_list)]
-        
-        df.to_csv(output_file,  sep=' ', header=False, index=False)
+
+        with open(output_file, 'w') as output:
+            for (index, row) in df.iterrows():
+                output.write(f'__label__{row["cat"]} {row["name"]}\n')
+
+                ~/fastText-0.9.2/fasttext supervised -input /workspace/datasets/fasttext/training_data.txt -output product_classifier -lr 1.0 -epoch 25 -wordNgrams 2
