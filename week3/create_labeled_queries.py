@@ -4,6 +4,8 @@ import xml.etree.ElementTree as ET
 import pandas as pd
 import numpy as np
 import csv
+from nltk.stem import PorterStemmer
+from nltk.tokenize import RegexpTokenizer
 
 # Useful if you want to perform stemming.
 import nltk
@@ -49,8 +51,31 @@ queries_df = pd.read_csv(queries_file_name)[['category', 'query']]
 queries_df = queries_df[queries_df['category'].isin(categories)]
 
 # IMPLEMENT ME: Convert queries to lowercase, and optionally implement other normalization, like stemming.
+print(queries_df[queries_df['query'] == 'Beats By Dr. Dre- Monster Pro Over-the-Ear Headphones -' ])
+
+queries_df['query'] = queries_df['query'].str.lower()
+print(queries_df['query'])
+queries_df['query'] = queries_df['query'].str.replace('[^a-z0-9\w]', ' ', regex=True)
+print(queries_df['query'])
+queries_df['query'] = queries_df['query'].str.replace('\s+', ' ', regex=True)
+
+
+# regexp = RegexpTokenizer('\w+')
+# queries_df['query'] = queries_df['query'].apply(regexp.tokenize)
+
+print(queries_df['query'])
+queries_df['query'] = queries_df['query'].str.split()
+print(queries_df['query'])
+
+stemmer = PorterStemmer()
+queries_df['query'] = queries_df['query'].apply( lambda word_list: ' '.join([stemmer.stem(word) for word in word_list ]))
+
+
+
 
 # IMPLEMENT ME: Roll up categories to ancestors to satisfy the minimum number of queries per category.
+
+
 
 # Create labels in fastText format.
 queries_df['label'] = '__label__' + queries_df['category']
