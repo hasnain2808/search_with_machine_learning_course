@@ -99,3 +99,8 @@ queries_df['label'] = '__label__' + queries_df['category']
 queries_df = queries_df[queries_df['category'].isin(categories)]
 queries_df['output'] = queries_df['label'] + ' ' + queries_df['query']
 queries_df[['output']].to_csv(output_file_name, header=False, sep='|', escapechar='\\', quoting=csv.QUOTE_NONE, index=False)
+
+
+# commands 
+# ~/fastText-0.9.2/fasttext supervised -input  /workspace/datasets/fasttext/train.txt -output /workspace/datasets/fasttext/model -lr 0.5 -epoch 25
+# ~/fastText-0.9.2/fasttext test  /workspace/datasets/fasttext/model.bin  /workspace/datasets/fasttext/test.txt 5
