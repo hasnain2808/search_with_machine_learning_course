@@ -6,6 +6,7 @@ import numpy as np
 import csv
 from nltk.stem import PorterStemmer
 from nltk.tokenize import RegexpTokenizer
+from tqdm import tqdm
 
 # Useful if you want to perform stemming.
 import nltk
@@ -74,8 +75,22 @@ queries_df['query'] = queries_df['query'].apply( lambda word_list: ' '.join([ste
 
 
 # IMPLEMENT ME: Roll up categories to ancestors to satisfy the minimum number of queries per category.
+while True:
+    
+    cats_to_replace = queries_df[queries_df['category'].map(queries_df['category'].value_counts()) < 10001]['category'].tolist()
+    cats_to_replace = set(cats_to_replace)
+    print(len(cats_to_replace))
+    if not cats_to_replace:
+        break
+    
+    for category in tqdm(cats_to_replace):
+        # print(category)
+        if category == 'cat00000':
+            continue
 
+        parent = parents_df[parents_df['category'] ==  category ]['parent'].iloc[0]
 
+        queries_df.loc[queries_df['category'] == category, 'category'] = parent
 
 # Create labels in fastText format.
 queries_df['label'] = '__label__' + queries_df['category']
