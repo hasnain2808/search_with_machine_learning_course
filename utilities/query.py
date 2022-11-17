@@ -12,6 +12,7 @@ import pandas as pd
 import fileinput
 import logging
 import fasttext
+from sentence_transformers import SentenceTransformer
 
 
 logger = logging.getLogger(__name__)
@@ -43,6 +44,26 @@ class Model:
         return category_list
 
 model = Model()
+transformer_model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+
+def create_vector_query(query, result_count):
+    encoded_query = transformer_model.encode([query])[0] 
+    return {
+        "size": result_count,
+        "query": {
+            "knn": {
+                "embeddings": {
+                    "vector": encoded_query,
+                    "k": result_count
+                }
+            }
+        },
+        "_source": {
+            "excludes": [
+                "embeddings"
+            ]
+        }
+    }
 
 # expects clicks and impressions to be in the row
 def create_prior_queries_from_group(
@@ -213,7 +234,7 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
     return query_obj
 
 
-def search(client, user_query, index="bbuy_products", sort="_score", sortDir="desc", category_list=None):
+def search(client, user_query, index="bbuy_products", sort="_score", sortDir="desc", category_list=None, vector=False, size = 10):
     #### W3: classify the query
     #### W3: create filters and boosts
     # Note: you may also want to modify the `create_query` method above
@@ -222,8 +243,10 @@ def search(client, user_query, index="bbuy_products", sort="_score", sortDir="de
             "categoryLeaf": category_list
         }
     }
-    
-    query_obj = create_query(user_query, click_prior_query=None, filters=filters, sort=sort, sortDir=sortDir, source=["name", "shortDescription"])
+    if vector:
+        query_obj = create_vector_query(user_query, size)
+    else:
+        query_obj = create_query(user_query, click_prior_query=None, filters=filters, sort=sort, sortDir=sortDir, source=["name", "shortDescription"])
     logging.info(query_obj)
     response = client.search(query_obj, index=index)
     if response and response['hits']['hits'] and len(response['hits']['hits']) > 0:
@@ -245,6 +268,10 @@ if __name__ == "__main__":
                          help='The OpenSearch port')
     general.add_argument('--user',
                          help='The OpenSearch admin.  If this is set, the program will prompt for password too. If not set, use default of admin/admin')
+    general.add_argument('--vector',
+                         help='use knn query')
+    general.add_argument('--size', default=10,
+                         help='use knn query')
 
     args = parser.parse_args()
 
@@ -257,7 +284,10 @@ if __name__ == "__main__":
     if args.user:
         password = getpass()
         auth = (args.user, password)
-
+    vector = False
+    if args.vector:
+        vector = True
+    size = args.size
     base_url = "https://{}:{}/".format(host, port)
     opensearch = OpenSearch(
         hosts=[{'host': host, 'port': port}],
@@ -274,14 +304,15 @@ if __name__ == "__main__":
     index_name = args.index
     query_prompt = "\nEnter your query (type 'Exit' to exit or hit ctrl-c):"
     print(query_prompt)
-    for line in fileinput.input():
-        query = line.rstrip()
+    while True:
+        query = input()
+        query = query.rstrip()
         if query == "Exit":
             break
 
         category_list = model.predict_label(query)
 
-        search(client=opensearch, user_query=query, index=index_name, category_list=category_list)
+        search(client=opensearch, user_query=query, index=index_name, category_list=category_list, vector=vector, size = size)
 
         print(query_prompt)
 
