@@ -12,6 +12,7 @@ import pandas as pd
 import fileinput
 import logging
 import fasttext
+from sentence_transformers import SentenceTransformer
 
 
 logger = logging.getLogger(__name__)
@@ -46,16 +47,21 @@ model = Model()
 transformer_model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
 
 def create_vector_query(query, result_count):
-    encoded_query = model.encode([query])[0] 
+    encoded_query = transformer_model.encode([query])[0] 
     return {
         "size": result_count,
         "query": {
             "knn": {
-                "my_vector": {
+                "embeddings": {
                     "vector": encoded_query,
                     "k": result_count
                 }
             }
+        },
+        "_source": {
+            "excludes": [
+                "embeddings"
+            ]
         }
     }
 
@@ -228,7 +234,7 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
     return query_obj
 
 
-def search(client, user_query, index="bbuy_products", sort="_score", sortDir="desc", category_list=None, vector=False):
+def search(client, user_query, index="bbuy_products", sort="_score", sortDir="desc", category_list=None, vector=False, size = 10):
     #### W3: classify the query
     #### W3: create filters and boosts
     # Note: you may also want to modify the `create_query` method above
@@ -264,6 +270,8 @@ if __name__ == "__main__":
                          help='The OpenSearch admin.  If this is set, the program will prompt for password too. If not set, use default of admin/admin')
     general.add_argument('--vector',
                          help='use knn query')
+    general.add_argument('--size', default=10,
+                         help='use knn query')
 
     args = parser.parse_args()
 
@@ -279,6 +287,7 @@ if __name__ == "__main__":
     vector = False
     if args.vector:
         vector = True
+    size = args.size
     base_url = "https://{}:{}/".format(host, port)
     opensearch = OpenSearch(
         hosts=[{'host': host, 'port': port}],
@@ -295,14 +304,15 @@ if __name__ == "__main__":
     index_name = args.index
     query_prompt = "\nEnter your query (type 'Exit' to exit or hit ctrl-c):"
     print(query_prompt)
-    for line in fileinput.input():
-        query = line.rstrip()
+    while True:
+        query = input()
+        query = query.rstrip()
         if query == "Exit":
             break
 
         category_list = model.predict_label(query)
 
-        search(client=opensearch, user_query=query, index=index_name, category_list=category_list, vector=vector)
+        search(client=opensearch, user_query=query, index=index_name, category_list=category_list, vector=vector, size = size)
 
         print(query_prompt)
 
